@@ -8,7 +8,8 @@
 export UI_NEXT_GIT_REPO=https://<git repo>
 ```
 
-or
+orr
+
 
 ```bash
 export UI_NEXT_GIT_REPO=git@<git repo>
