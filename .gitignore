@@ -34,7 +34,7 @@ awx/ui/templates/ui/installing.html
 awx/ui/node_modules/
 awx/ui/src/locales/*/messages.js
 awx/ui/coverage/
-awx/ui/build
+# awx/ui/build
 awx/ui/.env.local
 awx/ui/instrumented
 rsyslog.pid
