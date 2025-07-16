@@ -70,11 +70,11 @@ $(UI_NEXT_DIR)/src:
 			else \
 				echo "=== Cloning $(UI_NEXT_DIR)/src from $(UI_NEXT_GIT_BRANCH) of $(UI_NEXT_GIT_REPO) ==="; \
 				rm -rf $(UI_NEXT_DIR)/src; \
-				git clone --depth 1 --branch $(UI_NEXT_GIT_BRANCH) $(UI_NEXT_GIT_REPO) $(UI_NEXT_DIR)/src || true; \
+				git clone --depth 1 --branch $(UI_NEXT_GIT_BRANCH) $(UI_NEXT_GIT_REPO) $(UI_NEXT_DIR)/src ||  (echo "CLONE FAILED"; exit 1); \
 			fi; \
 		else \
 			echo "=== Cloning $(UI_NEXT_DIR)/src from $(UI_NEXT_GIT_BRANCH) of $(UI_NEXT_GIT_REPO) ==="; \
-			git clone --depth 1 --branch $(UI_NEXT_GIT_BRANCH) $(UI_NEXT_GIT_REPO) $(UI_NEXT_DIR)/src || true; \
+			git clone --depth 1 --branch $(UI_NEXT_GIT_BRANCH) $(UI_NEXT_GIT_REPO) $(UI_NEXT_DIR)/src ||  (echo "CLONE FAILED"; exit 1); \
 		fi; \
 	else \
 		echo "FAILED: ui-next/src. UI_NEXT_LOCAL and UI_NEXT_GIT_REPO are not set."; \
