@@ -164,7 +164,7 @@ use_dev_supervisor.txt
 /awx/ui/.ui-built
 /_build/
 /_build_kube_dev/
-/Dockerfile
+# /Dockerfile
 /Dockerfile.dev
 /Dockerfile.kube-dev
 

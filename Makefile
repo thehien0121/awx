@@ -507,7 +507,7 @@ HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
 else
-dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) ui-next
+dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE)
 endif
 	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
