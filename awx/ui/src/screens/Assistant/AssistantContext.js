@@ -29,11 +29,12 @@ export const AssistantProvider = ({ children }) => {
     // Kết nối WebSocket khi component mount
     useEffect(() => {
         if (loggedInUser?.id) {
-            const wsUrl = `ws://localhost:8000/ws/${loggedInUser.id}`;
+            const baseUrl = process.env.REACT_APP_ASSISTANT_SOCKET_URL;
+            const wsUrl = `${baseUrl}/${loggedInUser.id}`;
             wsRef.current = new WebSocket(wsUrl);
 
             wsRef.current.onopen = () => {
-                console.log('WebSocket connected');
+                console.log('WebSocket connected at', wsUrl);
                 wsRef.current.send(JSON.stringify({
                     request_type: socket_request_type.chat_history,
                     user_id: loggedInUser.id,
