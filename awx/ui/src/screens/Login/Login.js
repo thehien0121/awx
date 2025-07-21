@@ -189,7 +189,7 @@ function AWXLogin({ alt, isAuthenticated }) {
     <Login header={Header} footer={Footer}>
       <LoginMainHeader
         data-cy="login-header"
-        title={brandName ? t`Welcome to Infra Team - ${brandName}!` : ''}
+        title={brandName ? t`Welcome - ${brandName}!` : ''}
         subtitle={t`Please log in`}
       />
       <LoginMainBody>

@@ -75,7 +75,7 @@ function Dashboard() {
   }
   return (
     <>
-      {config?.ui_next && (
+      {/* {config?.ui_next && (
         <Banner variant="info">
           <Trans>
             <p>
@@ -84,7 +84,7 @@ function Dashboard() {
             </p>
           </Trans>
         </Banner>
-      )}
+      )} */}
       <ScreenHeader
         streamType="all"
         breadcrumbConfig={{ '/home': t`Dashboard` }}

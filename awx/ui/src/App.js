@@ -31,6 +31,8 @@ import useTitle from 'hooks/useTitle';
 import { dynamicActivate, locales } from './i18nLoader';
 import getRouteConfig from './routeConfig';
 import { SESSION_REDIRECT_URL } from './constants';
+import { AssistantProvider } from 'screens/Assistant/AssistantContext';
+import AssistantPage from 'screens/Assistant/Assistant';
 
 function ErrorFallback({ error }) {
   return (
@@ -41,6 +43,8 @@ function ErrorFallback({ error }) {
     </PageSection>
   );
 }
+
+const RenderAssistantPage = () => <AssistantPage />;
 
 const RenderAppContainer = () => {
   const userProfile = useUserProfile();
@@ -180,7 +184,9 @@ function App() {
             </Route>
             <ProtectedRoute>
               <ConfigProvider>
-                <RenderAppContainer />
+                <AssistantProvider>
+                  <RenderAppContainer />
+                </AssistantProvider>
               </ConfigProvider>
             </ProtectedRoute>
           </Switch>

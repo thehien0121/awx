@@ -25,6 +25,7 @@ import Users from 'screens/User';
 import WorkflowApprovals from 'screens/WorkflowApproval';
 import { Jobs } from 'screens/Job';
 import HostMetrics from 'screens/HostMetrics';
+import AssistantPage from 'screens/Assistant/Assistant';
 
 function getRouteConfig(userProfile = {}) {
   let routeConfig = [
@@ -164,6 +165,17 @@ function getRouteConfig(userProfile = {}) {
           title: <Trans>Topology View</Trans>,
           path: '/topology_view',
           screen: TopologyView,
+        },
+      ],
+    },
+    {
+      groupTitle: <Trans>Assistant</Trans>,
+      groupId: 'assistant',
+      routes: [
+        {
+          title: <Trans>Chat</Trans>,
+          path: '/assistant',
+          screen: AssistantPage,
         },
       ],
     },

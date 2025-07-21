@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { t } from '@lingui/macro';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   Dropdown,
@@ -16,12 +16,15 @@ import {
   PageHeaderToolsItem,
   Tooltip,
 } from '@patternfly/react-core';
-import { QuestionCircleIcon, UserIcon } from '@patternfly/react-icons';
+import { QuestionCircleIcon, UserIcon, RobotIcon } from '@patternfly/react-icons';
 import { WorkflowApprovalsAPI } from 'api';
 import useRequest from 'hooks/useRequest';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { useConfig } from 'contexts/Config';
 import useWsPendingApprovalCount from './useWsPendingApprovalCount';
+// import { FaRegCommentDots } from 'react-icons/fa';
+import Assistant from 'screens/Assistant/AssistantBox';
+import { useAssistant } from 'screens/Assistant/AssistantContext';
 
 const PendingWorkflowApprovals = styled.div`
   display: flex;
@@ -38,7 +41,10 @@ function PageHeaderToolbar({
 }) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
+  const [showAssistant, setShowAssistant] = useState(false);
   const config = useConfig();
+  const location = useLocation();
+  const { messages, setMessages } = useAssistant();
 
   const { request: fetchPendingApprovalCount, result: pendingApprovals } =
     useRequest(
@@ -63,6 +69,12 @@ function PageHeaderToolbar({
     fetchPendingApprovalCount();
   }, [fetchPendingApprovalCount]);
 
+  React.useEffect(() => {
+    if (location.pathname === '/assistant' && showAssistant) {
+      setShowAssistant(false);
+    }
+  }, [location.pathname]);
+
   const handleHelpSelect = () => {
     setIsHelpOpen(!isHelpOpen);
   };
@@ -70,9 +82,22 @@ function PageHeaderToolbar({
   const handleUserSelect = () => {
     setIsUserOpen(!isUserOpen);
   };
+
   return (
     <PageHeaderTools>
       <PageHeaderToolsGroup>
+        <Tooltip position="bottom" content={t`Open Assistant`}>
+          <PageHeaderToolsItem>
+            <span onClick={() => setShowAssistant((v) => !v)} style={{ cursor: 'pointer', marginRight: '15px', fontSize: '22px' }}>
+              <RobotIcon />
+            </span>
+          </PageHeaderToolsItem>
+        </Tooltip>
+        {showAssistant && (
+          <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 9999 }}>
+            <Assistant onClose={() => setShowAssistant(false)} />
+          </div>
+        )}
         <Tooltip position="bottom" content={t`Pending Workflow Approvals`}>
           <PageHeaderToolsItem>
             <Link to="/workflow_approvals?workflow_approvals.status=pending">

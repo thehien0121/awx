@@ -6,8 +6,7 @@ export default function useWebsocket(subscribeGroups) {
 
   useEffect(() => {
     ws.current = new WebSocket(
-      `${window.location.protocol === 'http:' ? 'ws:' : 'wss:'}//${
-        window.location.host
+      `${window.location.protocol === 'http:' ? 'ws:' : 'wss:'}//${window.location.host
       }${window.location.pathname}websocket/`
     );
 

@@ -77,7 +77,7 @@
     "prestart-instrumented": "lingui compile",
     "pretest": "lingui compile",
     "pretest-watch": "lingui compile",
-    "start": "cross-env TARGET=http://192.168.10.46:32000/ GENERATE_SOURCEMAP=false ESLINT_NO_DEV_ERRORS=true PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts start",
+    "start": "cross-env TARGET=http://192.168.10.46:32000/ GENERATE_SOURCEMAP=false ESLINT_NO_DEV_ERRORS=true PORT=3001 HTTPS=false DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts start",
     "start-instrumented": "ESLINT_NO_DEV_ERRORS=true DEBUG=instrument-cra PORT=3001 HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true react-scripts -r @cypress/instrument-cra start",
     "build": "cross-env INLINE_RUNTIME_CHUNK=false react-scripts build",
     "test": "TZ='UTC' react-scripts test --watchAll=false",
