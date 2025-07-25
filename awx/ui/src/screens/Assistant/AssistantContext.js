@@ -27,6 +27,7 @@ export const AssistantProvider = ({ children }) => {
         "chat_history": "conversation-history",
         "error": "error",
     }
+    const [streamingMessage, setStreamingMessage] = useState(''); // Thêm state lưu nội dung assistant đang stream
     // console.log(loggedInUser);
 
     // Hàm kết nối WebSocket
@@ -49,21 +50,70 @@ export const AssistantProvider = ({ children }) => {
         wsRef.current.onmessage = (event) => {
             try {
                 const response = JSON.parse(event.data);
-                if (response.request_type === socket_request_type.chat) {
-                    console.log('socket response awx-chat', response);
-                    setMessages(prevMessages => [
-                        ...prevMessages,
-                        { from: 'assistant', text: response.content.explanation }
-                    ]);
-                    if (response.content.result) {
-                        setMessages(prevMessages => [
-                            ...prevMessages,
-                            { from: 'assistant', text: response.content.result }
-                        ]);
-                    }
-                }
                 if (response.request_type === socket_request_type.chat_token) {
-                    console.log('socket response token', response);
+                    console.log('response', response);
+
+                    // Nhận từng ký tự/token, update message assistant đang typing
+                    setStreamingMessage(prev => {
+                        const newText = prev + response.content;
+                        setMessages(prevMessages => {
+                            // Nếu message cuối cùng là assistant đang typing (có flag isStreaming), update nó
+                            if (
+                                prevMessages.length > 0 &&
+                                prevMessages[prevMessages.length - 1].from === 'assistant' &&
+                                prevMessages[prevMessages.length - 1].isStreaming
+                            ) {
+                                const updated = [...prevMessages];
+                                updated[updated.length - 1] = {
+                                    ...updated[updated.length - 1],
+                                    text: newText
+                                };
+                                return updated;
+                            } else {
+                                // Nếu chưa có message A, thêm mới
+                                return [
+                                    ...prevMessages,
+                                    { from: 'assistant', text: newText, isStreaming: true }
+                                ];
+                            }
+                        });
+                        return newText;
+                    });
+                    return; // Không xử lý tiếp
+                }
+                if (response.request_type === socket_request_type.chat) {
+                    // Nhận full message, replace message A
+                    setStreamingMessage(''); // Reset
+                    setMessages(prevMessages => {
+                        // Nếu message cuối là assistant đang typing (isStreaming), replace nó
+                        if (
+                            prevMessages.length > 0 &&
+                            prevMessages[prevMessages.length - 1].from === 'assistant' &&
+                            prevMessages[prevMessages.length - 1].isStreaming
+                        ) {
+                            const updated = [...prevMessages];
+                            updated[updated.length - 1] = {
+                                from: 'assistant',
+                                text: response.content.explanation
+                            };
+                            // Nếu có result, thêm tiếp
+                            if (response.content.result) {
+                                updated.push({ from: 'assistant', text: response.content.result });
+                            }
+                            return updated;
+                        } else {
+                            // Nếu không có message A, thêm mới như cũ
+                            let updated = [
+                                ...prevMessages,
+                                { from: 'assistant', text: response.content.explanation }
+                            ];
+                            if (response.content.result) {
+                                updated.push({ from: 'assistant', text: response.content.result });
+                            }
+                            return updated;
+                        }
+                    });
+                    return; // Không xử lý tiếp
                 }
                 if (response.request_type === socket_request_type.chat_history) {
                     loadHistory(response.content);

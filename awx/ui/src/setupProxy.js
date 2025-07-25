@@ -1,23 +1,39 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
-const TARGET = process.env.TARGET || 'https://localhost:8043';
+const TARGET = process.env.TARGET || 'http://192.168.10.46:32000';
 
 module.exports = (app) => {
   app.use(
     ['/api', '/websocket', '/sso'],
     createProxyMiddleware({
       target: TARGET,
-      changeOrigin: true,           // <== GIỮ LẠI HEADER ORIGIN
-      secure: false,                // <== Cho phép self-signed cert (dev)
+      changeOrigin: false,          // QUAN TRỌNG: Không thay đổi origin
+      secure: false,
       ws: true,
-      cookieDomainRewrite: "localhost", // hoặc "192.168.10.199" nếu truy cập qua IP
+      cookieDomainRewrite: "localhost",
       onProxyReq: (proxyReq, req, res) => {
-        // Bắt buộc giữ lại cookie và origin (nếu cần)
+        // Giữ lại CSRF token và cookies
+        if (req.headers.cookie) {
+          proxyReq.setHeader('Cookie', req.headers.cookie);
+        }
+
+        // Giữ lại Origin header
+        if (req.headers.origin) {
+          proxyReq.setHeader('Origin', req.headers.origin);
+        }
+
+        // Giữ lại Referer header
+        if (req.headers.referer) {
+          proxyReq.setHeader('Referer', req.headers.referer);
+        }
+
+        console.log('Proxy Request to:', TARGET + req.url);
+        console.log('Origin:', req.headers.origin);
       },
       onProxyRes: (proxyRes, req, res) => {
-        // Có thể debug header tại đây
+        console.log('Proxy Response Status:', proxyRes.statusCode);
       },
-      logLevel: 'debug',            // (Tùy chọn, để debug proxy)
+      logLevel: 'debug',
     })
   );
 };
