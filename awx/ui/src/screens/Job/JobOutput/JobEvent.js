@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, forwardRef } from 'react';
 import {
   JobEventLine,
   JobEventLineToggle,
@@ -7,7 +7,7 @@ import {
   JobEventEllipsis,
 } from './shared';
 
-function JobEvent({
+const JobEvent = forwardRef(({
   style,
   lineTextHtml,
   isClickable,
@@ -18,7 +18,7 @@ function JobEvent({
   onToggleCollapsed,
   hasChildren,
   jobStatus,
-}) {
+}, ref) => {
   const numOutputLines = lineTextHtml?.length || 0;
   useEffect(() => {
     const timeout = setTimeout(measure, 0);
@@ -36,7 +36,7 @@ function JobEvent({
     });
   }
   return !event.stdout ? null : (
-    <div style={style} type={event.type}>
+    <div ref={ref} style={style} type={event.type}>
       {lineTextHtml.map(({ lineNumber, html }, index) => {
         if (lineNumber < 0) {
           return null;
@@ -69,6 +69,6 @@ function JobEvent({
       })}
     </div>
   );
-}
+});
 
 export default JobEvent;
