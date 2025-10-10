@@ -3,8 +3,8 @@
 ###
 ### DO NOT EDIT
 ###
-RUN ls -l /tmp/src/awx/ui_next
-# Build container
+
+# ===== Build container =====
 FROM quay.io/centos/centos:stream9 as builder
 
 ENV LANG en_US.UTF-8
@@ -71,12 +71,18 @@ RUN npm install -g n && n 20.18.1
 COPY . /tmp/src/
 WORKDIR /tmp/src/
 
-# Build sdist và pip install, không cần HEADLESS (nếu vẫn muốn build UI cũ)
+# ====== THÊM BƯỚC BUILD UI REACT ======
+WORKDIR /tmp/src/awx/ui
+#RUN npm install --legacy-peer-deps && npm run build 
+RUN export DISABLE_ESLINT_PLUGIN=true && export CI=false && npm install --legacy-peer-deps && npm run build
+WORKDIR /tmp/src/
+# =======================================
+
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
 
 RUN DJANGO_SETTINGS_MODULE=awx.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
 
-# Final container(s)
+# ===== Final container(s) =====
 FROM quay.io/centos/centos:stream9
 
 ENV LANG en_US.UTF-8
@@ -176,3 +182,4 @@ EXPOSE 8052
 ENTRYPOINT ["dumb-init", "--"]
 VOLUME /var/lib/nginx
 VOLUME /var/lib/awx/.local/share/containers
+
