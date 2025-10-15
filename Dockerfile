@@ -34,8 +34,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     nodejs \
     nss \
     openldap-devel \
-    # pin to older openssl, see jira AAP-23449
-    openssl-3.0.7 \
+    openssl \
     patch \
     postgresql \
     postgresql-devel \
@@ -69,7 +68,7 @@ ARG HEADLESS
 
 # Use the distro provided npm to bootstrap our required version of node
 
-RUN npm install -g n && n 16.13.1
+RUN npm install -g n && n 20.18.1
 
 # Copy source into builder, build sdist, install it into awx venv
 COPY . /tmp/src/
@@ -104,8 +103,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     krb5-workstation \
     nginx \
     "openldap >= 2.6.2-3" \
-    # pin to older openssl, see jira AAP-23449
-    openssl-3.0.7 \
+    openssl \
     postgresql \
     python3.11 \
     "python3.11-devel" \
