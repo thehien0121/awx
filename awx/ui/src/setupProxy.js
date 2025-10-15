@@ -4,7 +4,7 @@ const TARGET = process.env.TARGET || 'http://192.168.10.46:32000';
 
 module.exports = (app) => {
   app.use(
-    ['/api', '/websocket', '/sso'],
+    ['/api', '/websocket', '/sso', '/ws'],
     createProxyMiddleware({
       target: TARGET,
       changeOrigin: false,          // QUAN TRỌNG: Không thay đổi origin
