@@ -4,13 +4,14 @@
 ### DO NOT EDIT
 ###
 
-# ===== Build container =====
+# Build container
 FROM quay.io/centos/centos:stream9 as builder
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 ENV AWX_LOGGING_MODE stdout
+
 
 USER root
 
@@ -33,7 +34,8 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     nodejs \
     nss \
     openldap-devel \
-    openssl \
+    # pin to older openssl, see jira AAP-23449
+    openssl-3.0.7 \
     patch \
     postgresql \
     postgresql-devel \
@@ -50,6 +52,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
 
 RUN pip3.11 install -vv build
 
+
 # Install & build requirements
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
@@ -65,24 +68,18 @@ ARG SETUPTOOLS_SCM_PRETEND_VERSION
 ARG HEADLESS
 
 # Use the distro provided npm to bootstrap our required version of node
-RUN npm install -g n && n 20.18.1
+
+RUN npm install -g n && n 16.13.1
 
 # Copy source into builder, build sdist, install it into awx venv
 COPY . /tmp/src/
 WORKDIR /tmp/src/
-
-# ====== THÊM BƯỚC BUILD UI REACT ======
-WORKDIR /tmp/src/awx/ui
-#RUN npm install --legacy-peer-deps && npm run build 
-RUN export DISABLE_ESLINT_PLUGIN=true && export CI=false && npm install --legacy-peer-deps && npm run build
-WORKDIR /tmp/src/
-# =======================================
-
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
 
 RUN DJANGO_SETTINGS_MODULE=awx.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
 
-# ===== Final container(s) =====
+
+# Final container(s)
 FROM quay.io/centos/centos:stream9
 
 ENV LANG en_US.UTF-8
@@ -107,7 +104,8 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     krb5-workstation \
     nginx \
     "openldap >= 2.6.2-3" \
-    openssl \
+    # pin to older openssl, see jira AAP-23449
+    openssl-3.0.7 \
     postgresql \
     python3.11 \
     "python3.11-devel" \
@@ -129,10 +127,13 @@ RUN pip3.11 install -vv virtualenv supervisor dumb-init build
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
+
 # Copy app from builder
 COPY --from=builder /var/lib/awx /var/lib/awx
 
 RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
+
+
 
 ADD tools/ansible/roles/dockerfile/files/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 ADD tools/ansible/roles/dockerfile/files/wait-for-migrations /usr/local/bin/wait-for-migrations
@@ -149,6 +150,7 @@ ADD _build/supervisor_web.conf /etc/supervisord_web.conf
 ADD _build/supervisor_task.conf /etc/supervisord_task.conf
 ADD _build/supervisor_rsyslog.conf /etc/supervisord_rsyslog.conf
 ADD tools/scripts/awx-python /usr/bin/awx-python
+
 
 # Pre-create things we need to access
 RUN for dir in \
@@ -171,6 +173,7 @@ RUN for dir in \
       /var/lib/awx/rsyslog/rsyslog.conf ; \
     do touch $file ; chmod g+rw $file ; chgrp root $file ; done
 
+
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
@@ -182,4 +185,3 @@ EXPOSE 8052
 ENTRYPOINT ["dumb-init", "--"]
 VOLUME /var/lib/nginx
 VOLUME /var/lib/awx/.local/share/containers
-
