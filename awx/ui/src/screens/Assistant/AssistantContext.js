@@ -34,7 +34,31 @@ export const AssistantProvider = ({ children }) => {
     const connectWebSocket = () => {
         if (!loggedInUser?.id) return;
 
-        const baseUrl = process.env.REACT_APP_ASSISTANT_SOCKET_URL;
+        // Detect protocol dựa trên current page (giống useWebsocket.js)
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+        // Lấy base URL từ env variable
+        let baseUrl = process.env.REACT_APP_ASSISTANT_SOCKET_URL || '/ws';
+
+        // Xử lý URL: thêm protocol nếu chưa có, hoặc thay đổi protocol nếu có
+        if (baseUrl.startsWith('ws://') || baseUrl.startsWith('wss://')) {
+            // Nếu đã có protocol, thay đổi cho phù hợp với current page
+            baseUrl = baseUrl.replace(/^wss?:\/\//, `${protocol}//`);
+        } else if (baseUrl.startsWith('http://') || baseUrl.startsWith('https://')) {
+            // Nếu có http/https, convert sang ws/wss
+            baseUrl = baseUrl.replace(/^https?:\/\//, `${protocol}//`);
+        } else {
+            // Nếu không có protocol (chỉ có host:port/path), thêm protocol
+            // Trường hợp: "192.168.10.32:8000/ws" hoặc "/ws"
+            if (baseUrl.startsWith('/')) {
+                // Relative path: dùng current host
+                baseUrl = `${protocol}//${window.location.host}${baseUrl}`;
+            } else {
+                // Có host:port: thêm protocol
+                baseUrl = `${protocol}//${baseUrl}`;
+            }
+        }
+
         const wsUrl = `${baseUrl}/${loggedInUser.id}`;
         wsRef.current = new WebSocket(wsUrl);
 
