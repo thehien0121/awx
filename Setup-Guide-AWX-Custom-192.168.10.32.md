@@ -295,6 +295,12 @@ EOF
 kubectl create -f awx-cr-basic.yaml
 ```
 
+### Run db migration
+```
+kubectl exec -it deployment/awx-demo-web -n awx -c awx-demo-web -- \
+  awx-manage migrate
+```
+
 ### 5.2 Monitor Deployment
 
 ```bash

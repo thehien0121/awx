@@ -52,7 +52,18 @@ export const AssistantProvider = ({ children }) => {
             // Trường hợp: "192.168.10.32:8000/ws" hoặc "/ws"
             if (baseUrl.startsWith('/')) {
                 // Relative path: dùng current host
-                baseUrl = `${protocol}//${window.location.host}${baseUrl}`;
+                let host = window.location.host;
+
+                // Nếu truy cập qua IP:32000, đổi sang IP:8000 cho Assistant WebSocket
+                // Vì Assistant server chạy riêng ở port 8000
+                if (host.match(/^(\d+\.\d+\.\d+\.\d+):32000$/)) {
+                    const ip = host.split(':')[0];
+                    baseUrl = `${protocol}//${ip}:8000${baseUrl}`;
+                } else {
+                    // Truy cập qua domain (awx.infra.m-milu.com) → dùng relative path
+                    // Nginx sẽ proxy tới port 8000
+                    baseUrl = `${protocol}//${host}${baseUrl}`;
+                }
             } else {
                 // Có host:port: thêm protocol
                 baseUrl = `${protocol}//${baseUrl}`;
