@@ -32,7 +32,7 @@ export const AssistantProvider = ({ children }) => {
 
     // Hàm kết nối WebSocket
     const connectWebSocket = () => {
-        if (!loggedInUser?.id) return;
+        if (!loggedInUser?.username) return;
 
         // Detect protocol dựa trên current page (giống useWebsocket.js)
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -70,7 +70,7 @@ export const AssistantProvider = ({ children }) => {
             }
         }
 
-        const wsUrl = `${baseUrl}/${loggedInUser.id}`;
+        const wsUrl = `${baseUrl}/${loggedInUser.username}`;
         wsRef.current = new WebSocket(wsUrl);
 
         wsRef.current.onopen = () => {
@@ -78,7 +78,7 @@ export const AssistantProvider = ({ children }) => {
             reconnectAttemptsRef.current = 0; // Reset reconnect attempts on successful connection
             wsRef.current.send(JSON.stringify({
                 request_type: socket_request_type.chat_history,
-                user_id: loggedInUser.id,
+                user_id: loggedInUser.username,
             }));
         };
 
@@ -180,7 +180,7 @@ export const AssistantProvider = ({ children }) => {
 
     // Kết nối WebSocket khi component mount
     useEffect(() => {
-        if (loggedInUser?.id) {
+        if (loggedInUser?.username) {
             connectWebSocket();
         }
 
@@ -193,7 +193,7 @@ export const AssistantProvider = ({ children }) => {
                 wsRef.current.close(1000); // Close with code 1000 to prevent auto-reconnect
             }
         };
-    }, [loggedInUser?.id]);
+    }, [loggedInUser?.username]);
 
     // Hàm gửi tin nhắn qua WebSocket
     const sendMessage = (input) => {
@@ -207,7 +207,7 @@ export const AssistantProvider = ({ children }) => {
 
         // Gửi tin nhắn qua WebSocket
         const payload = {
-            user_id: loggedInUser.id,
+            user_id: loggedInUser.username,
             request_type: socket_request_type.chat,
             content: input
         };
